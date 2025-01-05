@@ -22,25 +22,39 @@ if (! defined('WPINC')) {
 define('EXPENSE_TRACKER_VERSION', '1.0.0');
 define('EXPENSE_TRACKER_PATH', plugin_dir_path(__FILE__));
 define('EXPENSE_TRACKER_URL', plugin_dir_url(__FILE__));
-
+define('EXPENSE_TRACKER_BASENAME', plugin_basename(__FILE__));
+define('EXPENSE_TRACKER_UPLOADS', wp_upload_dir()['basedir'] . '/expense-tracker');
+define('TEXT_DOMAIN', 'expense-tracker');
 
 // Include the App class
-require_once EXPENSE_TRACKER_PATH . 'includes/App/App.php';
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/Activator.php';
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/Deactivator.php';
-require_once EXPENSE_TRACKER_PATH . 'includes/Database/Migration.php'; // Include Database.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/Expense.php'; // Include Expense.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/Category.php'; // Include Category.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/Group.php'; // Include Group.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/GroupMember.php'; // Include GroupMember.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/Budget.php'; // Include Budget.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/ExpenseManager.php'; // Include ExpenseManager.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Menu.php'; // Include Menu.php
-require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Settings.php'; // Include Settings.php
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/ExpenseTracker.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Database/Migration.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Helpers/utils.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Modules/Expenses.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Modules/Groups.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Modules/Categories.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Modules/Budgets.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Modules/GroupMembers.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Settings.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/API/RestAPI.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/Route.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/View.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Controller/GroupController.php';
+// require_once EXPENSE_TRACKER_PATH . 'includes/Notifications/EmailNotifications.php';
+// require_once EXPENSE_TRACKER_PATH . 'includes/Reports/ReportGenerator.php';
 
+// Add activation hooks
+register_activation_hook(EXPENSE_TRACKER_BASENAME, function () {
+    // Create upload directory for receipts
+    wp_mkdir_p(EXPENSE_TRACKER_UPLOADS);
 
+    // Run migrations
+    ExpenseTracker\Database\Migration::make_migration();
+});
 
-// Create and run the app
-$app = new \ExpenseTracker\App\App();
-$app->run();
-register_activation_hook(__FILE__, array('\ExpenseTracker\Database\Migration', 'migrate'));
+// Add deactivation hook
+register_deactivation_hook(EXPENSE_TRACKER_BASENAME, array(ExpenseTracker\Database\Migration::class, 'deactivate'));
+
+// Initialize the plugin
+$expense_tracker = new ExpenseTracker\Core\ExpenseTracker();
+$expense_tracker->init();

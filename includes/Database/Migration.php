@@ -4,18 +4,17 @@ namespace ExpenseTracker\Database;
 
 class Migration
 {
-
-    public static function migrate()
+    public static function make_migration()
     {
         global $wpdb;
-
+        $plugin_prefix = 'expense_tracker_';
         $charset_collate = $wpdb->get_charset_collate();
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
 
 
         // Create groups table
-        $table_name = $wpdb->prefix . 'groups';
+        $table_name = $wpdb->prefix . $plugin_prefix . 'groups';
         $sql = "CREATE TABLE $table_name (
             group_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -28,7 +27,7 @@ class Migration
 
 
         // Create categories table
-        $table_name = $wpdb->prefix . 'categories';
+        $table_name = $wpdb->prefix . $plugin_prefix . 'categories';
         $sql = "CREATE TABLE $table_name (
             category_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -41,7 +40,7 @@ class Migration
         $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES {$wpdb->prefix}users(`ID`)");
 
         // Create expenses table
-        $table_name = $wpdb->prefix . 'expenses';
+        $table_name = $wpdb->prefix . $plugin_prefix . 'expenses';
         $sql = "CREATE TABLE $table_name (
             expense_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             user_id BIGINT UNSIGNED NOT NULL,
@@ -55,11 +54,11 @@ class Migration
         ) $charset_collate;";
         dbDelta($sql);
         $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES {$wpdb->prefix}users(`ID`)");
-        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`category_id`) REFERENCES {$wpdb->prefix}categories(`category_id`)");
-        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`group_id`) REFERENCES {$wpdb->prefix}groups(`group_id`)");
+        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`category_id`) REFERENCES {$wpdb->prefix}{$plugin_prefix}categories(`category_id`)");
+        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`group_id`) REFERENCES {$wpdb->prefix}{$plugin_prefix}groups(`group_id`)");
 
         // Create group_members table
-        $table_name = $wpdb->prefix . 'group_members';
+        $table_name = $wpdb->prefix . $plugin_prefix . 'group_members';
         $sql = "CREATE TABLE $table_name (
             group_id BIGINT UNSIGNED NOT NULL,
             user_id BIGINT UNSIGNED NOT NULL,
@@ -72,12 +71,12 @@ class Migration
         ) $charset_collate;";
         dbDelta($sql);
         $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`added_by`) REFERENCES {$wpdb->prefix}users(`ID`)");
-        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`group_id`) REFERENCES {$wpdb->prefix}groups(`group_id`)");
+        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`group_id`) REFERENCES {$wpdb->prefix}{$plugin_prefix}groups(`group_id`)");
         $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES {$wpdb->prefix}users(`ID`)");
 
 
         // Create budgets table
-        $table_name = $wpdb->prefix . 'budgets';
+        $table_name = $wpdb->prefix . $plugin_prefix . 'budgets';
         $sql = "CREATE TABLE $table_name (
             budget_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             user_id BIGINT UNSIGNED DEFAULT NULL,
@@ -92,20 +91,20 @@ class Migration
         ) $charset_collate;";
         dbDelta($sql);
         $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES {$wpdb->prefix}users(`ID`)");
-        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`group_id`) REFERENCES {$wpdb->prefix}groups(`group_id`)");
-        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`category_id`) REFERENCES {$wpdb->prefix}categories(`category_id`)");
+        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`group_id`) REFERENCES {$wpdb->prefix}{$plugin_prefix}groups(`group_id`)");
+        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`category_id`) REFERENCES {$wpdb->prefix}{$plugin_prefix}categories(`category_id`)");
+
+        update_option('expense_tracker_activated', 1);
+    }
+    public static function deactivate()
+    {
+        global $wpdb;
+        $plugin_prefix = 'expense_tracker_';
+        // Drop database tables
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$plugin_prefix}budgets");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$plugin_prefix}expenses");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$plugin_prefix}group_members");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$plugin_prefix}groups");
+        $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$plugin_prefix}categories");
     }
 }
-
-
-// WordPress database error: [You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOREIGN KEY (admin_id) REFERENCES wp_users(ID)' at line 1]
-// ALTER TABLE wp_groups ADD COLUMN FOREIGN KEY (admin_id) REFERENCES wp_users(ID)
-
-// WordPress database error: [You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOREIGN KEY (user_id) REFERENCES wp_users(ID)' at line 1]
-// ALTER TABLE wp_categories ADD COLUMN FOREIGN KEY (user_id) REFERENCES wp_users(ID)
-
-// WordPress database error: [You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOREIGN KEY (added_by) REFERENCES wp_users(ID)' at line 1]
-// ALTER TABLE wp_group_members ADD COLUMN FOREIGN KEY (added_by) REFERENCES wp_users(ID)
-
-// WordPress database error: [You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FOREIGN KEY (category_id) REFERENCES wp_categories(category_id)' at line 1]
-// ALTER TABLE wp_budgets ADD COLUMN FOREIGN KEY (category_id) REFERENCES wp_categories(category_id)
