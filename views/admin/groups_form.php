@@ -14,30 +14,33 @@ $title = $is_edit ? __('Edit Group', 'expense-tracker') : __('Add New Group', 'e
 
     <div class="et-card et-bg-light">
         <form method="post" id="group-form">
-            <input type="hidden" name="group_id" value="<?php echo esc_attr($group_id); ?>">
+
             <?php wp_nonce_field('et_group_nonce'); ?>
             <div class="et-grid et-grid-2">
                 <div class="et-form-group">
                     <label for="group_name"
                         class="et-text-tertiary"><?php echo esc_html__('Group Name', 'expense-tracker'); ?></label>
-                    <input type="text" id="group_name" name="group_name" class="regular-text" required>
+                    <input type="text" id="group_name" name="name" class="regular-text et-input" required>
+                    <small class="text-danger"></small>
                 </div>
 
                 <div class="et-form-group">
                     <label for="group_budget"
                         class="et-text-tertiary"><?php echo esc_html__('Budget', 'expense-tracker'); ?></label>
-                    <input type="number" id="group_budget" name="group_budget" class="regular-text" step="0.01" min="0"
-                        required>
+                    <input type="number" id="group_budget" name="budget" class="regular-text et-input" step="0.01"
+                        min="0" required>
+                    <small class="text-danger"></small>
                 </div>
             </div>
             <div class="et-form-group">
                 <label for="group_description"
                     class="et-text-tertiary"><?php echo esc_html__('Description', 'expense-tracker'); ?></label>
-                <textarea id="group_description" name="group_description" class="regular-text" rows="4"></textarea>
+                <textarea id="group_description" name="description" class="regular-text et-input" rows="4"></textarea>
+                <small class="text-danger"></small>
             </div>
 
             <div class="et-actions">
-                <button type="submit" class="button button-primary">
+                <button type="button" class="button button-primary submit">
                     <span class="dashicons dashicons-saved"></span>
                     <?php echo esc_html__('Save Group', 'expense-tracker'); ?>
                 </button>
@@ -50,34 +53,9 @@ $title = $is_edit ? __('Edit Group', 'expense-tracker') : __('Add New Group', 'e
     </div>
 </div>
 
-<script type="text/javascript">
-    jQuery(document).ready(function($) {
-        $('#group-form').on('submit', function(e) {
-            e.preventDefault();
-
-            const formData = {
-                name: $('#group_name').val(),
-                budget: $('#group_budget').val(),
-                description: $('#group_description').val()
-            };
-
-            $.ajax({
-                url: '<?php echo esc_url_raw(rest_url('expense-tracker/v1/groups')); ?>',
-                method: 'POST',
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce',
-                        '<?php echo wp_create_nonce('wp_rest'); ?>');
-                },
-                data: JSON.stringify(formData),
-                contentType: 'application/json',
-                success: function(response) {
-                    // window.location.href = '?page=expense-tracker-groups';
-                    console.log(response);
-                },
-                error: function(xhr) {
-                    alert(xhr.responseJSON?.message || 'Error saving group');
-                }
-            });
-        });
-    });
-</script>
+<?php
+wp_enqueue_script('expense-tracker-groups-form', EXPENSE_TRACKER_URL . 'assets/js/groups_form.js', array('jquery'), '', true);
+wp_localize_script('expense-tracker-groups-form', 'wpApiSettings', array(
+    'nonce' => wp_create_nonce('wp_rest'),
+));
+?>

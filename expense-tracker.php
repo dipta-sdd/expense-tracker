@@ -38,8 +38,10 @@ require_once EXPENSE_TRACKER_PATH . 'includes/Modules/GroupMembers.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Settings.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/API/RestAPI.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/Route.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/Request.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/View.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/GroupController.php';
+require_once EXPENSE_TRACKER_PATH . 'vendor/NinjaDB/autoload.php';
 // require_once EXPENSE_TRACKER_PATH . 'includes/Notifications/EmailNotifications.php';
 // require_once EXPENSE_TRACKER_PATH . 'includes/Reports/ReportGenerator.php';
 
@@ -57,4 +59,4 @@ register_deactivation_hook(EXPENSE_TRACKER_BASENAME, array(ExpenseTracker\Databa
 
 // Initialize the plugin
 $expense_tracker = new ExpenseTracker\Core\ExpenseTracker();
-$expense_tracker->init();
+// $expense_tracker->init();

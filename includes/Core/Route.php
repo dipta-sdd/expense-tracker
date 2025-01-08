@@ -4,47 +4,67 @@ namespace ExpenseTracker\Core;
 
 class Route
 {
+    private static $namespace = 'expense-tracker/v1';
 
-    public function __construct()
-    {
-        // add_action('init', array($this, 'register_routes'));
-    }
-
+    /**
+     * Register a GET route
+     * 
+     * @param string $path The path of the route
+     * @param callable $callback The callback function
+     */
     public static function get($path, $callback)
     {
-        register_rest_route('expense-tracker/v1', $path, array(
-            'methods' => 'GET',
-            'callback' => $callback
-        ));
+        self::register_route($path, 'GET', $callback);
     }
 
+    /**
+     * Register a POST route
+     * 
+     * @param string $path The path of the route
+     * @param callable $callback The callback function
+     */
     public static function post($path, $callback)
     {
-        register_rest_route('expense-tracker/v1', $path, array(
-            'methods' => 'POST',
-            'callback' => $callback
-        ));
+        self::register_route($path, 'POST', $callback);
     }
 
+    /**
+     * Register a PUT route
+     * 
+     * @param string $path The path of the route
+     * @param callable $callback The callback function
+     */
     public static function put($path, $callback)
     {
-        register_rest_route('expense-tracker/v1', $path, array(
-            'methods' => 'PUT',
-            'callback' => $callback,
-        ));
+        self::register_route($path, 'PUT', $callback);
     }
 
+    /**
+     * Register a DELETE route
+     * 
+     * @param string $path The path of the route
+     * @param callable $callback The callback function
+     */
     public static function delete($path, $callback)
     {
-        register_rest_route('expense-tracker/v1', $path, array(
-            'methods' => 'DELETE',
-            'callback' => $callback,
-        ));
+        self::register_route($path, 'DELETE', $callback);
     }
 
-    public static function check()
+    /**
+     * Register a route
+     * 
+     * @param string $path The path of the route
+     * @param string $method The HTTP method of the route
+     * @param callable $callback The callback function
+     */
+    private static function register_route($path, $method, $callback)
     {
-        // Register routes here
-        return 'groups';
+        register_rest_route(self::$namespace, $path, array(
+            'methods' => $method,
+            'callback' => $callback,
+            'permission_callback' => function () {
+                return current_user_can('manage_options');
+            }
+        ));
     }
 }

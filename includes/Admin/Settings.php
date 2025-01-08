@@ -6,6 +6,15 @@ use ExpenseTracker\Core\View;
 
 class Settings
 {
+    private $app;
+    public function __construct($expense_tracker = null)
+    {
+        if ($expense_tracker) {
+            $this->app = $expense_tracker;
+        } else {
+            $this->app = new ExpenseTracker();
+        }
+    }
     public function add_assets()
     {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
@@ -17,20 +26,8 @@ class Settings
     {
         // Only load on expense tracker pages
         if (strpos($hook, 'expense-tracker') !== false) {
-            wp_enqueue_style(
-                'expense-tracker-admin',
-                EXPENSE_TRACKER_URL . 'assets/css/admin.css',
-                array(),
-                EXPENSE_TRACKER_VERSION
-            );
-
-            wp_enqueue_script(
-                'expense-tracker-admin',
-                EXPENSE_TRACKER_URL . 'assets/js/admin.js',
-                array('jquery'),
-                EXPENSE_TRACKER_VERSION,
-                true
-            );
+            $this->app->add_style('expense-tracker-admin', 'assets/css/admin.css');
+            $this->app->add_script('expense-tracker-admin', 'assets/js/admin.js');
         }
     }
     public static function register_admin_menu()
@@ -82,22 +79,7 @@ class Settings
             array(View::class, 'admin_settings_page')
         );
     }
-    public static function display_dashboard_page()
-    {
-        require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Menu/dashboard_page.php';
-    }
-    public static function display_expenses_page()
-    {
-        require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Menu/expenses_page.php';
-    }
-    public static function display_groups_page()
-    {
-        require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Menu/groups_page.php';
-    }
-    public static function display_settings_page()
-    {
-        require_once EXPENSE_TRACKER_PATH . 'includes/Admin/Menu/setting_page.php';
-    }
+
     public static function expense_tracker_settings_init()
     {
         register_setting(
@@ -145,37 +127,8 @@ class Settings
             'expense_tracker_group_settings_section'
         );
 
-        // Add Budget Settings Section
-        add_settings_section(
-            'expense_tracker_budget_settings_section',
-            __('Budget Settings', 'expense-tracker'),
-            array(__CLASS__, 'budget_settings_section_callback'),
-            'expense-tracker-settings'
-        );
 
-        add_settings_field(
-            'expense_tracker_enable_email_alerts',
-            __('Enable Budget Email Alerts', 'expense-tracker'),
-            array(__CLASS__, 'email_alerts_render'),
-            'expense-tracker-settings',
-            'expense_tracker_budget_settings_section'
-        );
 
-        // Add Receipt Settings Section
-        add_settings_section(
-            'expense_tracker_receipt_settings_section',
-            __('Receipt Settings', 'expense-tracker'),
-            array(__CLASS__, 'receipt_settings_section_callback'),
-            'expense-tracker-settings'
-        );
-
-        add_settings_field(
-            'expense_tracker_max_receipt_size',
-            __('Maximum Receipt Size (MB)', 'expense-tracker'),
-            array(__CLASS__, 'max_receipt_size_render'),
-            'expense-tracker-settings',
-            'expense_tracker_receipt_settings_section'
-        );
 
         // ... add more sections and fields for other permissions ...
     }

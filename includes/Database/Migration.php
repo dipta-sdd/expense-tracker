@@ -18,6 +18,8 @@ class Migration
         $sql = "CREATE TABLE $table_name (
             group_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
+            budget DECIMAL(10,2) DEFAULT NULL,
+            description TEXT,
             admin_id BIGINT UNSIGNED NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -49,6 +51,7 @@ class Migration
             amount DECIMAL(10,2) NOT NULL,
             date DATE NOT NULL,
             description TEXT,
+            status VARCHAR(20) DEFAULT 'Active',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) $charset_collate;";

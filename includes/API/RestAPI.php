@@ -15,13 +15,14 @@ class RestAPI
     {
         add_action('rest_api_init', array($this, 'register_routes'));
     }
-
+    /**
+     * Register routes
+     * 
+     */
     public function register_routes()
     {
-        // Route::post('users/{id}', function ($id) {});
-        Route::post('/groups', array(GroupController::class, 'create_group'));
+        $group_controller = new GroupController();
+        Route::post('/groups', [$group_controller, 'create_group']);
+        Route::post('/group/(?P<id>\d+)', [$group_controller, 'delete_group']);
     }
 }
-
-// Initialize the REST API
-new RestAPI();

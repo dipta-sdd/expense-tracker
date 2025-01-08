@@ -262,3 +262,86 @@
         overflow-x: auto;
     }
 }
+
+.et-input.is-invalid {
+    border-color: #d63638 !important;
+}
+
+.et-pagination-controls {
+    margin-top: 10px;
+    gap: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    & .et-per-page {
+        display: inline-flex;
+        align-items: center;
+        justify-content: start;
+        gap: 5px;
+        flex-wrap: nowrap;
+        & select {
+            border-radius: 0;
+        }
+    }
+    & .et-pagination-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 5px;
+        & a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+        }
+    }
+}
+
+.sortable th{
+    & span.text{
+        float: left;
+    }
+    & .sorting-indicators {
+        cursor: pointer;
+        display: grid;
+        float: left;
+        & .sorting-indicator:before {
+            font: normal 20px/1 dashicons;
+            speak: never;
+            display: inline-block;
+            padding: 0;
+            top: -4px;
+            left: -8px;
+            line-height: .5;
+            position: relative;
+            vertical-align: top;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-decoration: none !important;
+            color: #a7aaad;
+        }
+    }
+    &.asc .sorting-indicators .asc::before{
+        color: #1d2327;
+    }
+    &.desc .sorting-indicators .desc::before{
+        color: #1d2327;
+    }
+    &.asc:hover .sorting-indicators{
+        & .asc::before{ 
+            color: #a7aaad;
+        }
+        & .desc::before{
+            color: #1d2327;
+        }
+    }
+    &.desc:hover .sorting-indicators{
+        & .desc::before{
+            color: #a7aaad;
+        }
+        & .asc::before{
+            color: #1d2327;
+        }
+    }
+
+}

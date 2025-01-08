@@ -3,43 +3,97 @@
 namespace ExpenseTracker\Core;
 
 use ExpenseTracker\Admin\Settings;
+use ExpenseTracker\API\RestAPI;
 
 class ExpenseTracker
 {
+    private $settings;
+    private $rest_api;
+    private $view;
+    private static $instance = false;
 
-    public function __construct() {}
+    public function __construct()
+    {
+        if (!self::$instance) {
+            self::$instance = $this;
+        }
+        $this->init_dependencies();
+        $this->init_hooks();
+        $this->init();
+        return self::$instance;
+    }
+
+    private function init_dependencies()
+    {
+        // Initialize dependencies
+        // Initialize settings
+        $this->settings = new Settings($this);
+        // Initialize rest api
+        $this->rest_api = new RestAPI();
+        // Initialize view
+        $this->view = new View();
+    }
+
+    private function init_hooks()
+    {
+        // Initialize hooks
+        add_action('init', [$this, 'init']);
+        add_action('admin_init', [$this->settings, 'expense_tracker_settings_init']);
+        add_action('admin_menu', [$this->settings, 'register_admin_menu']);
+    }
+
     public function init()
     {
-        $this->activate_admin();
-
-        // add_action('wp_enqueue_scripts', array($this, 'enqueue_public_assets'));
+        $this->enqueue_assets();
     }
 
-
-    public function after_activation_hook()
+    public function activate()
     {
-        // Check if the plugin has just been activated
-        if (get_option('expense_tracker_activated')) {
-            delete_option('expense_tracker_activated');
+        if (!get_option('expense_tracker_activated')) {
+            add_option('expense_tracker_activated', true);
         }
     }
-    public function activate_admin()
+
+
+
+    private function enqueue_assets()
     {
-        $admin_settings = new \ExpenseTracker\Admin\Settings();
-        $admin_settings->add_assets();
-
-        // Add admin menu
-        add_action('admin_menu', array($admin_settings, 'register_admin_menu'));
-
-        // Add admin init
-        add_action('admin_init', array($admin_settings, 'expense_tracker_settings_init'));
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_public_assets']);
+        add_action('admin_enqueue_scripts', [$this->settings, 'enqueue_admin_assets']);
+    }
+    /**
+     * Add a script to the WordPress enqueue queue.
+     *
+     * @param string $handle The handle of the script.
+     * @param string $src The source URL of the script.
+     */
+    public function add_script($handle, $src)
+    {
+        wp_enqueue_script(
+            $handle,
+            EXPENSE_TRACKER_URL . $src,
+            array('jquery'),
+            EXPENSE_TRACKER_VERSION,
+            true
+        );
     }
 
-
-
     /**
-     * Enqueue public-facing styles and scripts
+     * Add a style to the WordPress enqueue queue.
+     *
+     * @param string $handle The handle of the style.
+     * @param string $src The source URL of the style.
      */
+    public function add_style($handle, $src)
+    {
+        wp_enqueue_style(
+            $handle,
+            EXPENSE_TRACKER_URL . $src,
+            array(),
+            EXPENSE_TRACKER_VERSION
+        );
+    }
+
     public function enqueue_public_assets()
     {
         wp_enqueue_style(
