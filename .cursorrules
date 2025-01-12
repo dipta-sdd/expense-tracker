@@ -1,0 +1,32 @@
+it is a wordpress plugin.
+it is a expense tracker plugin.
+always try to use oop.
+try to use rest api.
+
+Basic User Stories
+
+As a logged-in user (any role with the add_expenses capability), I want to be able to quickly add new expenses with the amount, date, and a description, so that I can keep track of my spending.
+As a logged-in user, I want to choose from a list of predefined expense categories (e.g., food, travel, entertainment) so that I can categorize my expenses.
+As a logged-in user, I want to create my own custom expense categories so that I can organize my expenses in a way that makes sense to me.
+As a logged-in user, I want to view a list of all my expenses, sorted by date, so that I can see where my money is going.
+As a logged-in user, I want to be able to edit or delete an existing expense in case I make a mistake or need to update the information.
+Group/Organization User Stories
+
+As a logged-in user (any role with the create_groups capability), I want to create a new group so that I can track shared expenses with other users.
+As a group administrator (role with the manage_group_members capability), I want to invite other users to join my group so that we can track shared expenses.
+As a member of a group, I want to be able to see the expenses added by other group members so that we have a shared view of our finances.
+As a group administrator, I want to be able to assign roles and permissions to group members (e.g., "viewer," "editor") so that I can control who has access to modify expenses.
+Admin User Stories
+
+As an administrator, I want to configure the plugin settings, including which user roles have permission to add expenses, create groups, and manage group members.
+As an administrator, I want to be able to view and manage all expenses added by all users.
+As an administrator, I want to be able to create, edit, and delete predefined expense categories that are available to all users.
+Advanced User Stories
+
+As a user, I want to generate reports of my expenses over a specific period, so that I can analyze my spending habits.
+As a user, I want to set a budget for different categories and receive alerts if I exceed my budget.
+As a user, I want to upload receipts or images for each expense, so that I have a visual record of my spending
+
+These user stories provide a good starting point.
+
+Now you have a clear understanding of the user needs.

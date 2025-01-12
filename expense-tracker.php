@@ -18,15 +18,22 @@ if (! defined('WPINC')) {
     die;
 }
 
+// Define plugin constants if not already defined
+if (!defined('EXPENSE_TRACKER_PATH')) {
+    define('EXPENSE_TRACKER_PATH', plugin_dir_path(__FILE__));
+}
+
 // Define plugin constants
 define('EXPENSE_TRACKER_VERSION', '1.0.0');
-define('EXPENSE_TRACKER_PATH', plugin_dir_path(__FILE__));
 define('EXPENSE_TRACKER_URL', plugin_dir_url(__FILE__));
 define('EXPENSE_TRACKER_BASENAME', plugin_basename(__FILE__));
 define('EXPENSE_TRACKER_UPLOADS', wp_upload_dir()['basedir'] . '/expense-tracker');
 define('TEXT_DOMAIN', 'expense-tracker');
 
-// Include the App class
+// Include NinjaDB autoloader first
+require_once EXPENSE_TRACKER_PATH . 'vendor/NinjaDB/autoload.php';
+
+// // Then include other files
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/ExpenseTracker.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Database/Migration.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Helpers/utils.php';
@@ -41,7 +48,9 @@ require_once EXPENSE_TRACKER_PATH . 'includes/Core/Route.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/Request.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/View.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/GroupController.php';
-require_once EXPENSE_TRACKER_PATH . 'vendor/NinjaDB/autoload.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Controller/ExpenseController.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/Shortcode.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/Pages.php';
 // require_once EXPENSE_TRACKER_PATH . 'includes/Notifications/EmailNotifications.php';
 // require_once EXPENSE_TRACKER_PATH . 'includes/Reports/ReportGenerator.php';
 
@@ -56,7 +65,7 @@ register_activation_hook(EXPENSE_TRACKER_BASENAME, function () {
 
 // Add deactivation hook
 register_deactivation_hook(EXPENSE_TRACKER_BASENAME, array(ExpenseTracker\Database\Migration::class, 'deactivate'));
-
+register_activation_hook(__FILE__, ['\ExpenseTracker\Core\Pages', 'create_plugin_pages']);
 // Initialize the plugin
 $expense_tracker = new ExpenseTracker\Core\ExpenseTracker();
 // $expense_tracker->init();

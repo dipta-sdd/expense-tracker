@@ -181,8 +181,8 @@ jQuery(document).ready(function($) {
 
     function deleteGroup(groupId) {
         $.ajax({
-            url: '/wp-json/expense-tracker/v1/group/' + groupId,
-            type: 'POST',
+            url: '/wp-json/expense-tracker/v1/groups/' + groupId,
+            type: 'DELETE',
             beforeSend: function(xhr) {
                 xhr.setRequestHeader('X-WP-Nonce',
                     '<?php echo wp_create_nonce('wp_rest'); ?>');

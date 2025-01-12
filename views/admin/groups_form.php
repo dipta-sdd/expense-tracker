@@ -3,8 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$group_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$is_edit = $group_id > 0;
+
+$is_edit = isset($group);
 $title = $is_edit ? __('Edit Group', 'expense-tracker') : __('Add New Group', 'expense-tracker');
 ?>
 
@@ -16,11 +16,15 @@ $title = $is_edit ? __('Edit Group', 'expense-tracker') : __('Add New Group', 'e
         <form method="post" id="group-form">
 
             <?php wp_nonce_field('et_group_nonce'); ?>
+            <?php if ($is_edit): ?>
+            <input type="hidden" name="group_id" value="<?php echo esc_attr($group->group_id); ?>">
+            <?php endif; ?>
             <div class="et-grid et-grid-2">
                 <div class="et-form-group">
                     <label for="group_name"
                         class="et-text-tertiary"><?php echo esc_html__('Group Name', 'expense-tracker'); ?></label>
-                    <input type="text" id="group_name" name="name" class="regular-text et-input" required>
+                    <input type="text" id="group_name" name="name" class="regular-text et-input"
+                        value="<?php echo isset($group) ? esc_attr($group->name) : ''; ?>" required>
                     <small class="text-danger"></small>
                 </div>
 
@@ -28,14 +32,15 @@ $title = $is_edit ? __('Edit Group', 'expense-tracker') : __('Add New Group', 'e
                     <label for="group_budget"
                         class="et-text-tertiary"><?php echo esc_html__('Budget', 'expense-tracker'); ?></label>
                     <input type="number" id="group_budget" name="budget" class="regular-text et-input" step="0.01"
-                        min="0" required>
+                        min="0" value="<?php echo isset($group) ? esc_attr($group->budget) : ''; ?>" required>
                     <small class="text-danger"></small>
                 </div>
             </div>
             <div class="et-form-group">
                 <label for="group_description"
                     class="et-text-tertiary"><?php echo esc_html__('Description', 'expense-tracker'); ?></label>
-                <textarea id="group_description" name="description" class="regular-text et-input" rows="4"></textarea>
+                <textarea id="group_description" name="description" class="regular-text et-input"
+                    rows="4"><?php echo isset($group) ? esc_attr($group->description) : ''; ?></textarea>
                 <small class="text-danger"></small>
             </div>
 

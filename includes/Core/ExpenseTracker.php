@@ -11,7 +11,7 @@ class ExpenseTracker
     private $rest_api;
     private $view;
     private static $instance = false;
-
+    private $shortcode;
     public function __construct()
     {
         if (!self::$instance) {
@@ -32,6 +32,8 @@ class ExpenseTracker
         $this->rest_api = new RestAPI();
         // Initialize view
         $this->view = new View();
+        // Initialize shortcode
+        $this->shortcode = new Shortcode();
     }
 
     private function init_hooks()
@@ -106,6 +108,20 @@ class ExpenseTracker
         wp_enqueue_script(
             'expense-tracker-public',
             EXPENSE_TRACKER_URL . 'assets/js/public.js',
+            array('jquery'),
+            EXPENSE_TRACKER_VERSION,
+            true
+        );
+    }
+
+    public function enqueue_scripts()
+    {
+        // Enqueue existing styles...
+
+        // Enqueue the JavaScript file
+        wp_enqueue_script(
+            'expense-tracker-public',
+            plugins_url('assets/js/public.js', EXPENSE_TRACKER_FILE),
             array('jquery'),
             EXPENSE_TRACKER_VERSION,
             true

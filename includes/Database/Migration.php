@@ -15,11 +15,12 @@ class Migration
 
         // Create groups table
         $table_name = $wpdb->prefix . $plugin_prefix . 'groups';
-        $sql = "CREATE TABLE $table_name (
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             group_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             budget DECIMAL(10,2) DEFAULT NULL,
             description TEXT,
+            status VARCHAR(20) DEFAULT 'Active',
             admin_id BIGINT UNSIGNED NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -30,7 +31,7 @@ class Migration
 
         // Create categories table
         $table_name = $wpdb->prefix . $plugin_prefix . 'categories';
-        $sql = "CREATE TABLE $table_name (
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             category_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             user_id BIGINT UNSIGNED DEFAULT NULL, 
@@ -43,7 +44,7 @@ class Migration
 
         // Create expenses table
         $table_name = $wpdb->prefix . $plugin_prefix . 'expenses';
-        $sql = "CREATE TABLE $table_name (
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             expense_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             user_id BIGINT UNSIGNED NOT NULL,
             category_id BIGINT UNSIGNED NOT NULL,
@@ -62,7 +63,7 @@ class Migration
 
         // Create group_members table
         $table_name = $wpdb->prefix . $plugin_prefix . 'group_members';
-        $sql = "CREATE TABLE $table_name (
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             group_id BIGINT UNSIGNED NOT NULL,
             user_id BIGINT UNSIGNED NOT NULL,
             role VARCHAR(50) NOT NULL,
@@ -80,7 +81,7 @@ class Migration
 
         // Create budgets table
         $table_name = $wpdb->prefix . $plugin_prefix . 'budgets';
-        $sql = "CREATE TABLE $table_name (
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             budget_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             user_id BIGINT UNSIGNED DEFAULT NULL,
             group_id BIGINT UNSIGNED DEFAULT NULL,

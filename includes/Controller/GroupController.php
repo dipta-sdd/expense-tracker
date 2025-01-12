@@ -9,6 +9,9 @@ use ExpenseTracker\Core\Request;
 
 class GroupController
 {
+
+    public function __construct() {}
+
     public static function create_group(WP_REST_Request $request)
     {
         $request = new Request($request->get_json_params());
@@ -49,5 +52,56 @@ class GroupController
             'message' => 'Group deleted successfully',
             'data' => $request['id']
         ], 200);
+    }
+
+    public static function update_group(WP_REST_Request $request)
+    {
+        $group_id = $request->get_param('id');
+        $user_id = get_current_user_id();
+
+        // Check if user is admin of the group
+        $db = new BaseModel('expense_tracker_groups');
+        $group = $db->where('group_id', $group_id)
+            ->where('admin_id', $user_id)
+            ->first();
+
+        if (!$group) {
+            return new WP_REST_Response([
+                'message' => 'Group not found or permission denied'
+            ], 404);
+        }
+
+        $request = new Request($request->get_json_params());
+        $request->validate([
+            'name' => 'required|string|min:3|max:255',
+            'description' => 'required|string|min:3',
+            'budget' => 'nullable|numeric|min:0',
+            'status' => 'nullable|in:Active,Inactive'
+        ]);
+
+        if (!$request->isValid()) {
+            return new WP_REST_Response([
+                'message' => 'Validation failed',
+                'errors' => $request->getErrors()
+            ], 400);
+        }
+
+        $params = $request->all();
+        $db->where('group_id', $group_id)->update($params);
+
+        // Get updated group data
+        $updated_group = $db->select([
+            'g.*',
+            'admin.display_name as admin_name'
+        ])
+            ->table('expense_tracker_groups as g')
+            ->join('users as admin', 'g.admin_id', '=', 'admin.ID')
+            ->where('g.group_id', $group_id)
+            ->first();
+
+        return new WP_REST_Response([
+            'message' => 'Group updated successfully',
+            'group' => $updated_group
+        ]);
     }
 }

@@ -3,7 +3,7 @@
     // $total_items = 99;
     // $limit = 10;
     $total_pages = ceil($total_items / $limit);
-    $current_page = isset($_GET['p']) ? intval($_GET['p']) : 1;
+    $current_page = isset($_GET['offset']) ? intval($_GET['offset']) : 1;
     $url_params = $_GET;
     ?>
 
@@ -44,7 +44,7 @@
                 // $end = min($total_pages, max(5, $current_page + 2));
 
                 for ($i = 1; $i <= $total_pages; $i++) {
-                    $url_params['p'] = $i;
+                    $url_params['offset'] = $i;
                 ?>
             <a href="#" data-page="<?php echo $i; ?>"
                 class="button <?php echo $current_page == $i ? 'disabled" disabled' : '"'; ?>">
@@ -52,9 +52,8 @@
             </a>
             <?php
                 }
-
                 // Next page
-                $url_params['p'] = min($total_pages, $current_page + 1);
+                $url_params['offset'] = min($total_pages, $current_page + 1);
                 ?>
             <a href="#" data-page="<?php echo min($total_pages, $current_page + 1); ?>"
                 class="button <?php echo $current_page == $total_pages ? 'disabled' : ''; ?>"
