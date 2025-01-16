@@ -9,7 +9,7 @@ class ExpenseTracker
 
     public static function getInstance()
     {
-        if (null === self::$instance) {
+        if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
@@ -35,6 +35,8 @@ class ExpenseTracker
         $this->modules['categories'] = new \ExpenseTracker\Modules\Categories();
         $this->modules['settings'] = new \ExpenseTracker\Admin\Settings();
         $this->modules['api'] = new \ExpenseTracker\API\RestAPI();
+        new \ExpenseTracker\Controller\ReportHandler();
+        new \ExpenseTracker\Core\FormHandler();
     }
 
     public function activate()
@@ -111,5 +113,25 @@ class ExpenseTracker
     public function getModule($module)
     {
         return isset($this->modules[$module]) ? $this->modules[$module] : null;
+    }
+
+    public function enqueue_scripts()
+    {
+        // Enqueue existing styles...
+
+        // Enqueue the JavaScript file
+        wp_enqueue_script(
+            'expense-tracker-public',
+            plugins_url('assets/js/public.js', EXPENSE_TRACKER_FILE),
+            array('jquery'),
+            EXPENSE_TRACKER_VERSION,
+            true
+        );
+    }
+    public function pluginActionLinks($links)
+    {
+        $settings_link = '<a href="' . admin_url('admin.php?page=expense-tracker-settings') . '">' . __('Settings', 'expense-tracker') . '</a>';
+        array_unshift($links, $settings_link);
+        return $links;
     }
 }

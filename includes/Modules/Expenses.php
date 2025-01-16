@@ -212,12 +212,12 @@ class Expenses
     public function renderCategoriesPage()
     {
         $view = new \ExpenseTracker\Core\View();
-        $view->render('admin/expenses/categories');
+        $view->render('admin/categories/list');
     }
 
     public function renderReportsPage()
     {
         $view = new \ExpenseTracker\Core\View();
-        $view->render('admin/expenses/reports');
+        $view->render('admin/reports/index');
     }
 }

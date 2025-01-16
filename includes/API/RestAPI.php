@@ -4,6 +4,7 @@ namespace ExpenseTracker\API;
 
 use ExpenseTracker\Core\Route;
 use ExpenseTracker\Controller\ExpenseController;
+use ExpenseTracker\Controller\CategoryController;
 
 class RestAPI
 {
@@ -14,13 +15,18 @@ class RestAPI
 
     public function registerRoutes()
     {
-        $expense_controller = new ExpenseController();
+        // Expense Routes
+        Route::get('/expenses', [new ExpenseController(), 'index']);
+        Route::post('/expenses', [new ExpenseController(), 'store']);
+        Route::get('/expenses/(?P<id>\d+)', [new ExpenseController(), 'show']);
+        Route::put('/expenses/(?P<id>\d+)', [new ExpenseController(), 'update']);
+        Route::delete('/expenses/(?P<id>\d+)', [new ExpenseController(), 'destroy']);
 
-        // Expense routes
-        Route::get('/expenses', [$expense_controller, 'index']);
-        Route::post('/expenses', [$expense_controller, 'store']);
-        Route::get('/expenses/(?P<id>\d+)', [$expense_controller, 'show']);
-        Route::put('/expenses/(?P<id>\d+)', [$expense_controller, 'update']);
-        Route::delete('/expenses/(?P<id>\d+)', [$expense_controller, 'destroy']);
+        // Category Routes
+        Route::get('/categories', [new CategoryController(), 'index']);
+        Route::post('/categories', [new CategoryController(), 'store']);
+        Route::get('/categories/(?P<id>\d+)', [new CategoryController(), 'show']);
+        Route::put('/categories/(?P<id>\d+)', [new CategoryController(), 'update']);
+        Route::delete('/categories/(?P<id>\d+)', [new CategoryController(), 'destroy']);
     }
 }

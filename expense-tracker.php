@@ -24,7 +24,7 @@ if (!defined('EXPENSE_TRACKER_PATH')) {
 }
 
 
-
+define('EXPENSE_TRACKER_URL', plugin_dir_url(__FILE__));
 // Include NinjaDB autoloader first
 require_once EXPENSE_TRACKER_PATH . 'vendor/NinjaDB/autoload.php';
 
@@ -39,6 +39,9 @@ require_once EXPENSE_TRACKER_PATH . 'includes/Core/Route.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/Request.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/View.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/ExpenseController.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Controller/CategoryController.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Controller/ReportHandler.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/FormHandler.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/Shortcode.php';
 
 if (!defined('ABSPATH')) {

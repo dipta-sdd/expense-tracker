@@ -14,10 +14,12 @@ class Migration
         // Create categories table
         $table_name = $wpdb->prefix . $plugin_prefix . 'categories';
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-            category_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
+            description TEXT DEFAULT NULL,
             budget DECIMAL(10,2) Default NULL,
             created_by BIGINT UNSIGNED DEFAULT NULL, 
+            updated_by BIGINT UNSIGNED DEFAULT NULL, 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) $charset_collate;";
@@ -27,19 +29,19 @@ class Migration
         // Create expenses table
         $table_name = $wpdb->prefix . $plugin_prefix . 'expenses';
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-            expense_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             user_id BIGINT UNSIGNED NOT NULL,
             category_id BIGINT UNSIGNED NOT NULL,
             amount DECIMAL(10,2) NOT NULL,
             date DATE NOT NULL,
-            description TEXT,
+            description TEXT DEFAULT NULL,
             status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) $charset_collate;";
         dbDelta($sql);
         $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`user_id`) REFERENCES {$wpdb->prefix}users(`ID`)");
-        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`category_id`) REFERENCES {$wpdb->prefix}{$plugin_prefix}categories(`category_id`)");
+        $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`category_id`) REFERENCES {$wpdb->prefix}{$plugin_prefix}categories(`id`)");
 
         update_option('expense_tracker_activated', 1);
     }
