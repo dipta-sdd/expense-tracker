@@ -2,129 +2,114 @@
 
 namespace ExpenseTracker\Core;
 
-use ExpenseTracker\Admin\Settings;
-use ExpenseTracker\API\RestAPI;
-
 class ExpenseTracker
 {
-    private $settings;
-    private $rest_api;
-    private $view;
-    private static $instance = false;
-    private $shortcode;
-    public function __construct()
+    private static $instance = null;
+    private $modules = [];
+
+    public static function getInstance()
     {
-        if (!self::$instance) {
-            self::$instance = $this;
+        if (null === self::$instance) {
+            self::$instance = new self();
         }
-        $this->init_dependencies();
-        $this->init_hooks();
-        $this->init();
         return self::$instance;
     }
 
-    private function init_dependencies()
+    private function __construct()
     {
-        // Initialize dependencies
-        // Initialize settings
-        $this->settings = new Settings($this);
-        // Initialize rest api
-        $this->rest_api = new RestAPI();
-        // Initialize view
-        $this->view = new View();
-        // Initialize shortcode
-        $this->shortcode = new Shortcode();
+        $this->initHooks();
+        $this->loadModules();
     }
 
-    private function init_hooks()
+    private function initHooks()
     {
-        // Initialize hooks
+        register_activation_hook(EXPENSE_TRACKER_FILE, [$this, 'activate']);
+        register_deactivation_hook(EXPENSE_TRACKER_FILE, [$this, 'deactivate']);
         add_action('init', [$this, 'init']);
-        add_action('admin_init', [$this->settings, 'expense_tracker_settings_init']);
-        add_action('admin_menu', [$this->settings, 'register_admin_menu']);
     }
 
-    public function init()
+    private function loadModules()
     {
-        $this->enqueue_assets();
+        // Initialize core modules
+        $this->modules['expenses'] = new \ExpenseTracker\Modules\Expenses();
+        $this->modules['categories'] = new \ExpenseTracker\Modules\Categories();
+        $this->modules['settings'] = new \ExpenseTracker\Admin\Settings();
+        $this->modules['api'] = new \ExpenseTracker\API\RestAPI();
     }
 
     public function activate()
     {
-        if (!get_option('expense_tracker_activated')) {
-            add_option('expense_tracker_activated', true);
-        }
+        // Run migrations
+        $migration = new \ExpenseTracker\Database\Migration();
+        $migration->run();
+
+        // Set initial role capabilities
+        $this->setupInitialRoleCapabilities();
     }
 
-
-
-    private function enqueue_assets()
+    private function setupInitialRoleCapabilities()
     {
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_public_assets']);
-        add_action('admin_enqueue_scripts', [$this->settings, 'enqueue_admin_assets']);
-    }
-    /**
-     * Add a script to the WordPress enqueue queue.
-     *
-     * @param string $handle The handle of the script.
-     * @param string $src The source URL of the script.
-     */
-    public function add_script($handle, $src)
-    {
-        wp_enqueue_script(
-            $handle,
-            EXPENSE_TRACKER_URL . $src,
-            array('jquery'),
-            EXPENSE_TRACKER_VERSION,
-            true
-        );
-    }
+        $initial_caps = [
+            'administrator' => [
+                'manage_expenses',
+                'submit_expenses',
+                'view_expenses',
+                'approve_expenses',
+                'view_reports'
+            ],
+            'editor' => [
+                'submit_expenses',
+                'view_expenses',
+                'approve_expenses'
+            ],
+            'author' => [
+                'submit_expenses',
+                'view_expenses'
+            ]
+        ];
 
-    /**
-     * Add a style to the WordPress enqueue queue.
-     *
-     * @param string $handle The handle of the style.
-     * @param string $src The source URL of the style.
-     */
-    public function add_style($handle, $src)
-    {
-        wp_enqueue_style(
-            $handle,
-            EXPENSE_TRACKER_URL . $src,
-            array(),
-            EXPENSE_TRACKER_VERSION
-        );
+        update_option('expense_tracker_role_capabilities', $initial_caps);
+
+        // Apply the capabilities
+        $settings = new \ExpenseTracker\Admin\Settings();
+        $settings->updateRoleCapabilities();
     }
 
-    public function enqueue_public_assets()
+    public function deactivate()
     {
-        wp_enqueue_style(
-            'expense-tracker-public',
-            EXPENSE_TRACKER_URL . 'assets/css/public.css',
-            array(),
-            EXPENSE_TRACKER_VERSION
-        );
-
-        wp_enqueue_script(
-            'expense-tracker-public',
-            EXPENSE_TRACKER_URL . 'assets/js/public.js',
-            array('jquery'),
-            EXPENSE_TRACKER_VERSION,
-            true
-        );
+        // Cleanup if needed
     }
 
-    public function enqueue_scripts()
+    public function init()
     {
-        // Enqueue existing styles...
+        // Initialize shortcodes
+        new \ExpenseTracker\Core\Shortcode();
+    }
 
-        // Enqueue the JavaScript file
-        wp_enqueue_script(
-            'expense-tracker-public',
-            plugins_url('assets/js/public.js', EXPENSE_TRACKER_FILE),
-            array('jquery'),
-            EXPENSE_TRACKER_VERSION,
-            true
-        );
+    private function setupRoles()
+    {
+        // Add capabilities to Administrator
+        $admin = get_role('administrator');
+        $admin->add_cap('manage_expenses');
+        $admin->add_cap('submit_expenses');
+        $admin->add_cap('view_expenses');
+        $admin->add_cap('approve_expenses');
+        $admin->add_cap('view_reports');
+
+        // Add capabilities to Editor
+        $editor = get_role('editor');
+        $editor->add_cap('submit_expenses');
+        $editor->add_cap('view_expenses');
+        $editor->add_cap('approve_expenses');
+
+        // Add capabilities to Author
+        $author = get_role('author');
+        $author->add_cap('submit_expenses');
+        $author->add_cap('view_expenses');
+    }
+
+    public function getModule($module)
+    {
+        return isset($this->modules[$module]) ? $this->modules[$module] : null;
     }
 }

@@ -2,39 +2,25 @@
 
 namespace ExpenseTracker\API;
 
-use ExpenseTracker\Controller\GroupController;
-use ExpenseTracker\Controller\ExpenseController;
 use ExpenseTracker\Core\Route;
+use ExpenseTracker\Controller\ExpenseController;
 
 class RestAPI
 {
-    public $route;
-    /**
-     * Initialize the REST API
-     */
     public function __construct()
     {
-        add_action('rest_api_init', array($this, 'register_routes'));
+        add_action('rest_api_init', [$this, 'registerRoutes']);
     }
-    /**
-     * Register routes
-     * 
-     */
-    public function register_routes()
+
+    public function registerRoutes()
     {
-        // Group routes
-        $group_controller = new GroupController();
-        // Route::get('/groups', [$group_controller, 'get_groups']);
-        // Route::get('/groups/(?P<id>\d+)', [$group_controller, 'get_group']);
-        Route::post('/groups', [$group_controller, 'create_group']);
-        Route::put('/groups/(?P<id>\d+)', [$group_controller, 'update_group']);
-        Route::delete('/groups/(?P<id>\d+)', [$group_controller, 'delete_group']);
+        $expense_controller = new ExpenseController();
 
         // Expense routes
-        // $expense_controller = new ExpenseController();
-        // Route::get('/expenses', [$expense_controller, 'get_expenses']);
-        // Route::post('/expenses', [$expense_controller, 'create_expense']);
-        // Route::put('/expenses/(?P<id>\d+)', [$expense_controller, 'update_expense']);
-        // Route::delete('/expenses/(?P<id>\d+)', [$expense_controller, 'delete_expense']);
+        Route::get('/expenses', [$expense_controller, 'index']);
+        Route::post('/expenses', [$expense_controller, 'store']);
+        Route::get('/expenses/(?P<id>\d+)', [$expense_controller, 'show']);
+        Route::put('/expenses/(?P<id>\d+)', [$expense_controller, 'update']);
+        Route::delete('/expenses/(?P<id>\d+)', [$expense_controller, 'destroy']);
     }
 }

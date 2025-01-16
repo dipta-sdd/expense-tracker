@@ -61,10 +61,12 @@ class Route
     {
         register_rest_route(self::$namespace, $path, array(
             'methods' => $method,
-            'callback' => $callback,
-            'permission_callback' => function () {
-                return current_user_can('manage_options');
-            }
+            'callback' => function ($wp_request) use ($callback) {
+                // Convert WP_REST_Request to our custom Request
+                $request = new Request($wp_request);
+                return call_user_func_array($callback, [$request, ...array_values($wp_request->get_url_params())]);
+            },
+            'permission_callback' => '__return_true' // Permissions are handled in the controller
         ));
     }
 }
