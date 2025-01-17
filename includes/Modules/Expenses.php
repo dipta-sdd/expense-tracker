@@ -122,6 +122,7 @@ class Expenses
     public function getExpense($id)
     {
         global $wpdb;
+
         $query = $wpdb->prepare("SELECT e.*, c.name as category_name, u1.display_name as created_by_name, u2.display_name as updated_by_name
                                 FROM {$this->table_name} e
                                 LEFT JOIN {$wpdb->prefix}expense_tracker_categories c ON e.category_id = c.id
@@ -165,12 +166,14 @@ class Expenses
             }
         }
 
-        $query = $wpdb->prepare("SELECT e.*, c.name as category_name, u1.display_name as created_by_name, u2.display_name as updated_by_name
+        $sql = "SELECT e.*, c.name as category_name, u1.display_name as created_by_name, u2.display_name as updated_by_name
                                 FROM {$this->table_name} e
                                 LEFT JOIN {$wpdb->prefix}expense_tracker_categories c ON e.category_id = c.id
                                 LEFT JOIN {$wpdb->users} u1 ON e.created_by = u1.ID
                                 LEFT JOIN {$wpdb->users} u2 ON e.updated_by = u2.ID
-                                {$where} ORDER BY {$order_by}", $params);
+                                {$where} ORDER BY {$order_by}";
+
+        $query = $wpdb->prepare($sql, $params);
 
         return $wpdb->get_results($query, ARRAY_A);
     }
