@@ -1,0 +1,42 @@
+/* .expense-tracker-shortcode {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+} */
+
+.expense-tracker-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.expense-tracker-filters select,
+.expense-tracker-filters button {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.expense-tracker-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.expense-tracker-table th,
+.expense-tracker-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.expense-tracker-table th {
+    background-color: #f0f0f0;
+}
+
+.expense-tracker-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}

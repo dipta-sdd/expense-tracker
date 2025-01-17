@@ -74,124 +74,125 @@ class Expenses
     public function createExpense($data)
     {
         global $wpdb;
-
-        $defaults = [
-            'user_id' => get_current_user_id(),
-            'amount' => 0,
-            'description' => '',
-            'category_id' => 0,
-            'date' => current_time('mysql'),
-            'status' => 'pending',
-            'created_at' => current_time('mysql'),
-        ];
-
-        $data = wp_parse_args($data, $defaults);
-
-        // Sanitize data
         $data = $this->sanitizeExpenseData($data);
-
-        // Validate data
+        $data['created_by'] = get_current_user_id();
         if (!$this->validateExpenseData($data)) {
-            return new \WP_Error('validation_failed', __('Invalid expense data', 'expense-tracker'));
+            return new \WP_Error('invalid_data', __('Invalid expense data.', 'expense-tracker'));
         }
 
-        $inserted = $wpdb->insert(
-            $this->table_name,
-            $data,
-            [
-                '%d', // user_id
-                '%f', // amount
-                '%s', // description
-                '%d', // category_id
-                '%s', // date
-                '%s', // status
-                '%s', // created_at
-            ]
-        );
+        $result = $wpdb->insert($this->table_name, $data);
 
-        if (!$inserted) {
-            return new \WP_Error('db_insert_error', __('Could not create expense', 'expense-tracker'));
+        if ($result === false) {
+            return new \WP_Error('db_error', __('Failed to create expense.', 'expense-tracker'), ['status' => 500]);
         }
 
-        return $wpdb->insert_id;
+        $id = $wpdb->insert_id;
+        return $this->getExpense($id);
+    }
+
+    public function updateExpense($id, $data)
+    {
+        global $wpdb;
+        $data = $this->sanitizeExpenseData($data);
+        if (!$this->validateExpenseData($data)) {
+            return new \WP_Error('invalid_data', __('Invalid expense data.', 'expense-tracker'));
+        }
+
+        $result = $wpdb->update($this->table_name, $data, ['id' => $id]);
+
+        if ($result === false) {
+            return new \WP_Error('db_error', __('Failed to update expense.', 'expense-tracker'), ['status' => 500]);
+        }
+
+        return $this->getExpense($id);
+    }
+
+    public function deleteExpense($id)
+    {
+        global $wpdb;
+        $result = $wpdb->delete($this->table_name, ['id' => $id]);
+
+        if ($result === false) {
+            return new \WP_Error('db_error', __('Failed to delete expense.', 'expense-tracker'), ['status' => 500]);
+        }
+
+        return true;
     }
 
     public function getExpense($id)
     {
         global $wpdb;
-
-        $expense = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT * FROM {$this->table_name} WHERE id = %d",
-                $id
-            ),
-            ARRAY_A
-        );
-
-        return $expense;
+        $query = $wpdb->prepare("SELECT e.*, c.name as category_name, u1.display_name as created_by_name, u2.display_name as updated_by_name
+                                FROM {$this->table_name} e
+                                LEFT JOIN {$wpdb->prefix}expense_tracker_categories c ON e.category_id = c.id
+                                LEFT JOIN {$wpdb->users} u1 ON e.created_by = u1.ID
+                                LEFT JOIN {$wpdb->users} u2 ON e.updated_by = u2.ID
+                                WHERE e.id = %d", $id);
+        return $wpdb->get_row($query, ARRAY_A);
     }
 
     public function getExpenses($args = [])
     {
         global $wpdb;
+        $where = 'WHERE 1=1';
+        $order_by = 'e.date DESC';
+        $params = [];
 
-        $defaults = [
-            'per_page' => 10,
-            'page' => 1,
-            'user_id' => 0,
-            'category_id' => 0,
-            'status' => '',
-            'orderby' => 'date',
-            'order' => 'DESC',
-        ];
-
-        $args = wp_parse_args($args, $defaults);
-        $offset = ($args['page'] - 1) * $args['per_page'];
-
-        $where = "WHERE 1=1";
-        if ($args['user_id']) {
-            $where .= $wpdb->prepare(" AND user_id = %d", $args['user_id']);
-        }
-        if ($args['category_id']) {
-            $where .= $wpdb->prepare(" AND category_id = %d", $args['category_id']);
-        }
-        if ($args['status']) {
-            $where .= $wpdb->prepare(" AND status = %s", $args['status']);
+        if (!empty($args['category_id'])) {
+            $where .= ' AND e.category_id = %d';
+            $params[] = $args['category_id'];
         }
 
-        $sql = "SELECT * FROM {$this->table_name} 
-                {$where} 
-                ORDER BY {$args['orderby']} {$args['order']}
-                LIMIT %d OFFSET %d";
+        if (!empty($args['status'])) {
+            $where .= ' AND e.status = %s';
+            $params[] = $args['status'];
+        }
 
-        return $wpdb->get_results(
-            $wpdb->prepare($sql, $args['per_page'], $offset),
-            ARRAY_A
-        );
+        if (!empty($args['sort_by'])) {
+            switch ($args['sort_by']) {
+                case 'date_asc':
+                    $order_by = 'e.date ASC';
+                    break;
+                case 'amount_asc':
+                    $order_by = 'e.amount ASC';
+                    break;
+                case 'amount_desc':
+                    $order_by = 'e.amount DESC';
+                    break;
+                default:
+                    $order_by = 'e.date DESC';
+                    break;
+            }
+        }
+
+        $query = $wpdb->prepare("SELECT e.*, c.name as category_name, u1.display_name as created_by_name, u2.display_name as updated_by_name
+                                FROM {$this->table_name} e
+                                LEFT JOIN {$wpdb->prefix}expense_tracker_categories c ON e.category_id = c.id
+                                LEFT JOIN {$wpdb->users} u1 ON e.created_by = u1.ID
+                                LEFT JOIN {$wpdb->users} u2 ON e.updated_by = u2.ID
+                                {$where} ORDER BY {$order_by}", $params);
+
+        return $wpdb->get_results($query, ARRAY_A);
     }
 
     private function sanitizeExpenseData($data)
     {
+        $current_user = wp_get_current_user();
         return [
-            'user_id' => absint($data['user_id']),
             'amount' => floatval($data['amount']),
             'description' => sanitize_text_field($data['description']),
-            'category_id' => absint($data['category_id']),
+            'category_id' => intval($data['category_id']),
             'date' => sanitize_text_field($data['date']),
-            'status' => sanitize_text_field($data['status']),
-            'created_at' => sanitize_text_field($data['created_at']),
+            'status' => sanitize_text_field($data['status'] ?? 'pending'),
+            'updated_by' => $current_user->ID,
+            'created_at' => current_time('mysql'),
+            'updated_at' => current_time('mysql')
         ];
     }
 
     private function validateExpenseData($data)
     {
-        if ($data['amount'] <= 0) {
-            return false;
-        }
-        if (empty($data['description'])) {
-            return false;
-        }
-        if ($data['category_id'] <= 0) {
+        if (empty($data['amount']) || empty($data['description']) || empty($data['category_id']) || empty($data['date'])) {
             return false;
         }
         return true;
@@ -212,7 +213,7 @@ class Expenses
     public function renderCategoriesPage()
     {
         $view = new \ExpenseTracker\Core\View();
-        $view->render('admin/categories/list');
+        $view->render('admin/categories/list', ['categories' => $categories]);
     }
 
     public function renderReportsPage()

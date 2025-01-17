@@ -1,11 +1,13 @@
 <?php
 if (!defined('ABSPATH')) exit;
+
+$categories = expense_tracker_init()->getModule('categories')->getCategories();
 ?>
 
 <div class="wrap">
     <h1><?php _e('Add New Expense', 'expense-tracker'); ?></h1>
 
-    <form method="post" action="" class="expense-form">
+    <form id="add-expense-form" method="post" action="" class="expense-form">
         <?php wp_nonce_field('create_expense', 'expense_nonce'); ?>
 
         <table class="form-table">
@@ -34,7 +36,13 @@ if (!defined('ABSPATH')) exit;
                 <td>
                     <select name="category_id" id="category" required>
                         <option value=""><?php _e('Select Category', 'expense-tracker'); ?></option>
-                        <!-- Categories will be populated dynamically -->
+                        <?php if ($categories) : ?>
+                            <?php foreach ($categories as $category) : ?>
+                                <option value="<?php echo esc_attr($category['id']); ?>">
+                                    <?php echo esc_html($category['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </select>
                 </td>
             </tr>
@@ -53,3 +61,45 @@ if (!defined('ABSPATH')) exit;
         <?php submit_button(__('Add Expense', 'expense-tracker')); ?>
     </form>
 </div>
+
+<script>
+    jQuery(document).ready(function($) {
+        $('#add-expense-form').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = $(this).serializeObject();
+
+            $.ajax({
+                url: '<?php echo get_rest_url(null, 'expense-tracker/v1/expenses'); ?>',
+                method: 'POST',
+                data: formData,
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', '<?php echo wp_create_nonce('wp_rest'); ?>');
+                },
+                success: function(response) {
+                    console.log('Expense created:', response);
+                    window.location.href = '<?php echo admin_url('admin.php?page=expense-tracker'); ?>';
+                },
+                error: function(error) {
+                    console.error('Error creating expense:', error);
+                }
+            });
+        });
+
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+    });
+</script>

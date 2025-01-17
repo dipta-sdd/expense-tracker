@@ -85,7 +85,7 @@ class ExpenseTracker
     public function init()
     {
         // Initialize shortcodes
-        new \ExpenseTracker\Core\Shortcode();
+        new \ExpenseTracker\Core\Shortcodes();
     }
 
     private function setupRoles()

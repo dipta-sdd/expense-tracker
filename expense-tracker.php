@@ -42,7 +42,7 @@ require_once EXPENSE_TRACKER_PATH . 'includes/Controller/ExpenseController.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/CategoryController.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/ReportHandler.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/FormHandler.php';
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/Shortcode.php';
+require_once EXPENSE_TRACKER_PATH . 'includes/Core/Shortcodes.php';
 
 if (!defined('ABSPATH')) {
     exit;
