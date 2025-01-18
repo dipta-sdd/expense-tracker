@@ -1,6 +1,18 @@
-# Expense Tracker Plugin - Keep Tabs on Your Spending!
+# Expense Tracker
 
-Hey there! This WordPress plugin is designed to help you easily track your expenses, categorize them, and get a clear view of where your money is going. Whether you're managing personal finances or keeping track of business spending, this plugin has got you covered.
+**Contributors:** Sankarsan Das
+**Tags:** expense, tracker, finance, budget
+**Requires at least:** 5.0
+**Tested up to:** 6.7
+**Stable tag:** 1.0.0
+**License:** GPLv2 or later
+**License URI:** https://www.gnu.org/licenses/gpl-2.0.html
+
+Track your expenses with ease using this WordPress plugin. Submit, categorize, and manage your spending effectively.
+
+## Description
+
+This WordPress plugin is designed to help you easily track your expenses, categorize them, and get a clear view of where your money is going. Whether you're managing personal finances or keeping track of business spending, this plugin has got you covered.
 
 ## What Can It Do?
 
@@ -11,7 +23,7 @@ Hey there! This WordPress plugin is designed to help you easily track your expen
 - **Shortcodes for Flexibility:** Use shortcodes to display the expense form and list on any page or post.
 - **Customizable Display:** Tweak how your expenses are shown to fit your needs.
 
-## Getting Started
+## Installation
 
 1.  **Upload:** Drop the `expense-tracker` folder into your `/wp-content/plugins/` directory.
 2.  **Activate:** Head over to the 'Plugins' menu in WordPress and activate the plugin.
@@ -37,17 +49,9 @@ Hey there! This WordPress plugin is designed to help you easily track your expen
 - Look for the "Expense Tracker" menu in your WordPress admin panel.
 - From there, you can manage all your expenses and categories.
 
-## What's New?
+## Changelog
 
 ### 1.0.0
 
 - The very first version of the Expense Tracker plugin!
 - Includes everything you need to submit, list, and manage expenses and categories.
-
-## Want to Help?
-
-Got ideas or found a bug? Feel free to contribute to the project!
-
-## License
-
-This plugin is released under the GPLv2 or later license.

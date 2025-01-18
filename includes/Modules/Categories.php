@@ -16,6 +16,12 @@ class Categories
         $this->user_table = $wpdb->prefix . 'users';
     }
 
+    /**
+     * Create a new category.
+     *
+     * @param array $data The category data.
+     * @return int|WP_Error The ID of the created category or an error object.
+     */
     public function createCategory($data)
     {
         global $wpdb;
@@ -35,6 +41,13 @@ class Categories
         return $wpdb->insert_id;
     }
 
+    /**
+     * Update an existing category.
+     *
+     * @param int $id The ID of the category to update.
+     * @param array $data The updated category data.
+     * @return bool|WP_Error True if the category is updated successfully, false otherwise.
+     */
     public function updateCategory($id, $data)
     {
         global $wpdb;
@@ -53,6 +66,12 @@ class Categories
         return true;
     }
 
+    /**
+     * Delete an existing category.
+     *
+     * @param int $id The ID of the category to delete.
+     * @return bool|WP_Error True if the category is deleted successfully, false otherwise.
+     */
     public function deleteCategory($id)
     {
         global $wpdb;
@@ -65,6 +84,12 @@ class Categories
         return true;
     }
 
+    /**
+     * Get a single category by its ID.
+     *
+     * @param int $id The ID of the category to retrieve.
+     * @return array|null The category data or null if not found.
+     */
     public function getCategory($id)
     {
         global $wpdb;
@@ -75,6 +100,11 @@ class Categories
         return $category;
     }
 
+    /**
+     * Get a list of categories.
+     *
+     * @return array The list of categories.
+     */
     public function getCategories()
     {
         global $wpdb;
@@ -82,6 +112,12 @@ class Categories
         return $wpdb->get_results($query, ARRAY_A);
     }
 
+    /**
+     * Sanitize the category data.
+     *
+     * @param array $data The category data.
+     * @return array The sanitized category data.
+     */
     private function sanitizeCategoryData($data)
     {
         return [
@@ -91,6 +127,12 @@ class Categories
         ];
     }
 
+    /**
+     * Validate the category data.
+     *
+     * @param array $data The category data.
+     * @return bool True if the data is valid, false otherwise.
+     */
     private function validateCategoryData($data)
     {
         if (empty($data['name'])) {

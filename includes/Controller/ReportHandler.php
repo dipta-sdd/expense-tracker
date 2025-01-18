@@ -2,32 +2,47 @@
 
 namespace ExpenseTracker\Controller;
 
+use ExpenseTracker\Core\Request;
+
 class ReportHandler
 {
-    public function __construct()
+    public function __construct() {}
+
+    /**
+     * Handles the report request and returns the report data.
+     *
+     * @param Request $request The incoming request.
+     * @return array The report data.
+     */
+    public function getReportController(Request $request)
     {
-        add_action('wp_ajax_get_expense_report', [$this, 'getExpenseReport']);
+        $attrs = $request->all();
+        return $this->getExpenseReport($attrs);
     }
 
-    public function getExpenseReport()
+    /**
+     * Generates the expense report based on the provided attributes.
+     *
+     * @param array $attrs The attributes for the report.
+     * @return array The generated report data.
+     */
+    public function getExpenseReport($attrs)
     {
-        check_ajax_referer('expense_tracker_nonce', '_nonce');
-        // error_log('getExpenseReport');
-        $period = $_POST['period'] ?? 'this_month';
-        $start_date = $_POST['start_date'] ?? '';
-        $end_date = $_POST['end_date'] ?? '';
-        $category = $_POST['category'] ?? '';
+        // check_ajax_referer('expense_tracker_nonce', '_nonce');
+        $period = isset($attrs['period']) ? $attrs['period'] : 'this_month';
+        $start_date = isset($attrs['start_date']) ? $attrs['start_date'] : '';
+        $end_date = isset($attrs['end_date']) ? $attrs['end_date'] : '';
+        $category = isset($attrs['category']) ? $attrs['category'] : '';
 
         // Get date range based on period
         $dates = $this->getDateRange($period, $start_date, $end_date);
-
-        // Get expenses data
+        // error_log(json_encode($dates));
         $expenses = expense_tracker_init()->getModule('expenses')->getExpenses([
             'start_date' => $dates['start'],
             'end_date' => $dates['end'],
             'category_id' => $category
         ]);
-
+        // error_log(json_encode($expenses));
         // Prepare response data
         $response = [
             'timeline' => $this->prepareTimelineData($expenses, $dates['start'], $dates['end']),
@@ -35,9 +50,17 @@ class ReportHandler
             'summary' => $this->prepareSummaryData($expenses)
         ];
 
-        wp_send_json_success($response);
+        return $response;
     }
 
+    /**
+     * Calculates the date range based on the selected period.
+     *
+     * @param string $period The selected period (this_month, last_month, this_year, custom).
+     * @param string $start_date The custom start date.
+     * @param string $end_date The custom end date.
+     * @return array An array containing the start and end dates.
+     */
     private function getDateRange($period, $start_date, $end_date)
     {
         $today = current_time('Y-m-d');
@@ -45,18 +68,18 @@ class ReportHandler
         switch ($period) {
             case 'this_month':
                 return [
-                    'start' => date('Y-m-01'),
-                    'end' => date('Y-m-t')
+                    'start' => gmdate('Y-m-01'),
+                    'end' => gmdate('Y-m-t')
                 ];
             case 'last_month':
                 return [
-                    'start' => date('Y-m-01', strtotime('last month')),
-                    'end' => date('Y-m-t', strtotime('last month'))
+                    'start' => gmdate('Y-m-01', strtotime('last month')),
+                    'end' => gmdate('Y-m-t', strtotime('last month'))
                 ];
             case 'this_year':
                 return [
-                    'start' => date('Y-01-01'),
-                    'end' => date('Y-12-31')
+                    'start' => gmdate('Y-01-01'),
+                    'end' => gmdate('Y-12-31')
                 ];
             case 'custom':
                 return [
@@ -65,17 +88,25 @@ class ReportHandler
                 ];
             default:
                 return [
-                    'start' => date('Y-m-01'),
-                    'end' => date('Y-m-t')
+                    'start' => gmdate('Y-m-01'),
+                    'end' => gmdate('Y-m-t')
                 ];
         }
     }
 
+    /**
+     * Prepares the timeline data for the report.
+     *
+     * @param array $expenses The expenses data.
+     * @param string $start_date The start date of the report.
+     * @param string $end_date The end date of the report.
+     * @return array The prepared timeline data.
+     */
     private function prepareTimelineData($expenses, $start_date, $end_date)
     {
         $timeline = [
             'labels' => [],
-            'values' => []
+            'values' => [],
         ];
 
         // Create date range array
@@ -93,7 +124,7 @@ class ReportHandler
 
         // Fill in actual values
         foreach ($expenses as $expense) {
-            $date = date('Y-m-d', strtotime($expense['date']));
+            $date = gmdate('Y-m-d', strtotime($expense['date']));
             $index = array_search($date, $timeline['labels']);
             if ($index !== false) {
                 $timeline['values'][$index] += floatval($expense['amount']);
@@ -103,6 +134,12 @@ class ReportHandler
         return $timeline;
     }
 
+    /**
+     * Prepares the category data for the report.
+     *
+     * @param array $expenses The expenses data.
+     * @return array The prepared category data.
+     */
     private function prepareCategoryData($expenses)
     {
         $categories = [
@@ -125,6 +162,12 @@ class ReportHandler
         return $categories;
     }
 
+    /**
+     * Prepares the summary data for the report.
+     *
+     * @param array $expenses The expenses data.
+     * @return array The prepared summary data.
+     */
     private function prepareSummaryData($expenses)
     {
         $total = 0;

@@ -36,8 +36,8 @@ class ExpenseTracker
         $this->modules['settings'] = new \ExpenseTracker\Admin\Settings();
         $this->modules['api'] = new \ExpenseTracker\API\RestAPI();
         $this->modules['view'] = new \ExpenseTracker\Core\View();
-        new \ExpenseTracker\Controller\ReportHandler();
-        new \ExpenseTracker\Core\FormHandler();
+        $this->modules['report'] = new \ExpenseTracker\Controller\ReportHandler();
+        // new \ExpenseTracker\Core\FormHandler();
     }
 
     public function activate()

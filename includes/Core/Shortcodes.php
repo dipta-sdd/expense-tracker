@@ -15,10 +15,16 @@ class Shortcodes
     public function enqueueScripts()
     {
         wp_enqueue_script('jquery');
-        wp_enqueue_style('expense-tracker-styles', EXPENSE_TRACKER_URL . 'assets/css/expense-tracker-styles.css');
-        wp_enqueue_script('expense-tracker-scripts', EXPENSE_TRACKER_URL . 'assets/js/expense-tracker-scripts.js', ['jquery'], false, true);
+        wp_enqueue_style('expense-tracker-styles', EXPENSE_TRACKER_URL . 'assets/css/expense-tracker-styles.css', [], EXPENSE_TRACKER_VERSION);
+        wp_enqueue_script('expense-tracker-scripts', EXPENSE_TRACKER_URL . 'assets/js/expense-tracker-scripts.js', ['jquery'], EXPENSE_TRACKER_VERSION, true);
     }
 
+    /**
+     * Render the expenses list shortcode.
+     *
+     * @param array $atts The shortcode attributes.
+     * @return string The rendered HTML content.
+     */
     public function renderExpensesList($atts)
     {
         $filter = $atts['filter'] ?? true;
@@ -36,6 +42,12 @@ class Shortcodes
         return ob_get_clean();
     }
 
+    /**
+     * Render the expense submission form shortcode.
+     *
+     * @param array $atts The shortcode attributes.
+     * @return string The rendered HTML content.
+     */
     public function renderExpenseSubmissionForm($atts)
     {
         $atts = shortcode_atts([
@@ -49,5 +61,3 @@ class Shortcodes
         return ob_get_clean();
     }
 }
-
-// new Shortcodes();

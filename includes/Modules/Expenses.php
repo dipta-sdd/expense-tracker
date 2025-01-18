@@ -11,66 +11,17 @@ class Expenses
     {
         global $wpdb;
         $this->table_name = $wpdb->prefix . 'expense_tracker_expenses';
-        $this->init();
     }
 
-    private function init()
-    {
-        add_action('admin_menu', [$this, 'registerAdminMenus']);
-    }
 
-    public function registerAdminMenus()
-    {
-        // Main menu
-        add_menu_page(
-            __('Expense Tracker', 'expense-tracker'),
-            __('Expense Tracker', 'expense-tracker'),
-            'manage_options',
-            $this->menu_slug,
-            [$this, 'renderMainPage'],
-            'dashicons-money-alt',
-            30
-        );
 
-        // Submenu pages
-        add_submenu_page(
-            $this->menu_slug,
-            __('All Expenses', 'expense-tracker'),
-            __('All Expenses', 'expense-tracker'),
-            'manage_options',
-            $this->menu_slug,
-            [$this, 'renderMainPage']
-        );
 
-        add_submenu_page(
-            $this->menu_slug,
-            __('Add New Expense', 'expense-tracker'),
-            __('Add New', 'expense-tracker'),
-            'manage_options',
-            $this->menu_slug . '-add-new',
-            [$this, 'renderAddNewPage']
-        );
-
-        // Additional submenu pages
-        add_submenu_page(
-            $this->menu_slug,
-            __('Categories', 'expense-tracker'),
-            __('Categories', 'expense-tracker'),
-            'manage_options',
-            $this->menu_slug . '-categories',
-            [$this, 'renderCategoriesPage']
-        );
-
-        add_submenu_page(
-            $this->menu_slug,
-            __('Reports', 'expense-tracker'),
-            __('Reports', 'expense-tracker'),
-            'manage_options',
-            $this->menu_slug . '-reports',
-            [$this, 'renderReportsPage']
-        );
-    }
-
+    /**
+     * Create a new expense.
+     *
+     * @param array $data The expense data.
+     * @return array|WP_Error The created expense or an error object.
+     */
     public function createExpense($data)
     {
         global $wpdb;
@@ -90,6 +41,13 @@ class Expenses
         return $this->getExpense($id);
     }
 
+    /**
+     * Update an existing expense.
+     *
+     * @param int $id The ID of the expense to update.
+     * @param array $data The updated expense data.
+     * @return array|WP_Error The updated expense or an error object.
+     */
     public function updateExpense($id, $data)
     {
         global $wpdb;
@@ -107,6 +65,12 @@ class Expenses
         return $this->getExpense($id);
     }
 
+    /**
+     * Delete an existing expense.
+     *
+     * @param int $id The ID of the expense to delete.
+     * @return bool|WP_Error True if the expense is deleted successfully, false otherwise.
+     */
     public function deleteExpense($id)
     {
         global $wpdb;
@@ -119,19 +83,34 @@ class Expenses
         return true;
     }
 
+    /**
+     * Get a single expense by its ID.
+     *
+     * @param int $id The ID of the expense to retrieve.
+     * @return array|null The expense data or null if not found.
+     */
     public function getExpense($id)
     {
         global $wpdb;
 
-        $query = $wpdb->prepare("SELECT e.*, c.name as category_name, u1.display_name as created_by_name, u2.display_name as updated_by_name
-                                FROM {$this->table_name} e
-                                LEFT JOIN {$wpdb->prefix}expense_tracker_categories c ON e.category_id = c.id
-                                LEFT JOIN {$wpdb->users} u1 ON e.created_by = u1.ID
-                                LEFT JOIN {$wpdb->users} u2 ON e.updated_by = u2.ID
-                                WHERE e.id = %d", $id);
+        $query = $wpdb->prepare(
+            "SELECT e.*, c.name as category_name, u1.display_name as created_by_name, u2.display_name as updated_by_name
+            FROM {$this->table_name} e
+            LEFT JOIN {$wpdb->prefix}expense_tracker_categories c ON e.category_id = c.id
+            LEFT JOIN {$wpdb->users} u1 ON e.created_by = u1.ID
+            LEFT JOIN {$wpdb->users} u2 ON e.updated_by = u2.ID
+            WHERE e.id = %d",
+            $id
+        );
         return $wpdb->get_row($query, ARRAY_A);
     }
 
+    /**
+     * Get a list of expenses.
+     *
+     * @param array $args The query arguments.
+     * @return array The list of expenses.
+     */
     public function getExpenses($args = [])
     {
         global $wpdb;
@@ -147,6 +126,16 @@ class Expenses
         if (!empty($args['status'])) {
             $where .= ' AND e.status = %s';
             $params[] = $args['status'];
+        }
+
+        if (!empty($args['start_date'])) {
+            $where .= ' AND e.date >= %s';
+            $params[] = $args['start_date'];
+        }
+
+        if (!empty($args['end_date'])) {
+            $where .= ' AND e.date <= %s';
+            $params[] = $args['end_date'];
         }
 
         if (!empty($args['sort_by'])) {
@@ -178,6 +167,12 @@ class Expenses
         return $wpdb->get_results($query, ARRAY_A);
     }
 
+    /**
+     * Sanitize the expense data.
+     *
+     * @param array $data The expense data.
+     * @return array The sanitized expense data.
+     */
     private function sanitizeExpenseData($data)
     {
         $current_user = wp_get_current_user();
@@ -193,35 +188,17 @@ class Expenses
         ];
     }
 
+    /**
+     * Validate the expense data.
+     *
+     * @param array $data The expense data.
+     * @return bool True if the data is valid, false otherwise.
+     */
     private function validateExpenseData($data)
     {
         if (empty($data['amount']) || empty($data['description']) || empty($data['category_id']) || empty($data['date'])) {
             return false;
         }
         return true;
-    }
-
-    public function renderMainPage()
-    {
-        $view = new \ExpenseTracker\Core\View();
-        $view->render('admin/expenses/list');
-    }
-
-    public function renderAddNewPage()
-    {
-        $view = new \ExpenseTracker\Core\View();
-        $view->render('admin/expenses/new');
-    }
-
-    public function renderCategoriesPage()
-    {
-        $view = new \ExpenseTracker\Core\View();
-        $view->render('admin/categories/list', ['categories' => $categories]);
-    }
-
-    public function renderReportsPage()
-    {
-        $view = new \ExpenseTracker\Core\View();
-        $view->render('admin/reports/index');
     }
 }

@@ -11,7 +11,6 @@ class Migration
         $charset_collate = $wpdb->get_charset_collate();
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        // Create categories table
         $table_name = $wpdb->prefix . $plugin_prefix . 'categories';
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -26,7 +25,6 @@ class Migration
         dbDelta($sql);
         $wpdb->query("ALTER TABLE $table_name ADD CONSTRAINT FOREIGN KEY (`created_by`) REFERENCES {$wpdb->prefix}users(`ID`)");
 
-        // Create expenses table
         $table_name = $wpdb->prefix . $plugin_prefix . 'expenses';
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -55,7 +53,6 @@ class Migration
     {
         global $wpdb;
         $plugin_prefix = 'expense_tracker_';
-        // Drop database tables
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$plugin_prefix}expenses");
         $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$plugin_prefix}categories");
     }

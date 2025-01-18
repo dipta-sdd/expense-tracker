@@ -2,15 +2,14 @@
 
 /**
  * Plugin Name: Expense Tracker
- * Plugin URI:  (Your Plugin Website URL)
+ * Plugin URI:  https://github.com/dipta-sdd/expense-tracker
  * Description: A WordPress plugin for tracking personal and group expenses.
  * Version:     1.0.0
- * Author:      (Sankarsan Das)
- * Author URI:  (www.sankarsan.xyz)
+ * Author:      Sankarsan Das
+ * Author URI:  https://www.sankarsan.xyz
  * License:     GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: expense-tracker
- * Domain Path: /languages
  */
 
 // If this file is called directly, abort.
@@ -39,7 +38,7 @@ require_once EXPENSE_TRACKER_PATH . 'includes/Core/View.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/ExpenseController.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/CategoryController.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Controller/ReportHandler.php';
-require_once EXPENSE_TRACKER_PATH . 'includes/Core/FormHandler.php';
+// require_once EXPENSE_TRACKER_PATH . 'includes/Core/FormHandler.php';
 require_once EXPENSE_TRACKER_PATH . 'includes/Core/Shortcodes.php';
 
 if (!defined('ABSPATH')) {

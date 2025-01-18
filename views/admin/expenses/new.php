@@ -5,7 +5,7 @@ $categories = expense_tracker_init()->getModule('categories')->getCategories();
 ?>
 
 <div class="wrap">
-    <h1><?php _e('Add New Expense', 'expense-tracker'); ?></h1>
+    <h1><?php esc_html_e('Add New Expense', 'expense-tracker'); ?></h1>
 
     <form id="add-expense-form" method="post" action="" class="expense-form">
         <?php wp_nonce_field('create_expense', 'expense_nonce'); ?>
@@ -13,7 +13,7 @@ $categories = expense_tracker_init()->getModule('categories')->getCategories();
         <table class="form-table">
             <tr>
                 <th scope="row">
-                    <label for="amount"><?php _e('Amount', 'expense-tracker'); ?></label>
+                    <label for="amount"><?php esc_html_e('Amount', 'expense-tracker'); ?></label>
                 </th>
                 <td>
                     <input type="number" step="0.01" name="amount" id="amount" class="regular-text" required>
@@ -22,7 +22,7 @@ $categories = expense_tracker_init()->getModule('categories')->getCategories();
 
             <tr>
                 <th scope="row">
-                    <label for="description"><?php _e('Description', 'expense-tracker'); ?></label>
+                    <label for="description"><?php esc_html_e('Description', 'expense-tracker'); ?></label>
                 </th>
                 <td>
                     <textarea name="description" id="description" class="large-text" rows="3" required></textarea>
@@ -31,11 +31,11 @@ $categories = expense_tracker_init()->getModule('categories')->getCategories();
 
             <tr>
                 <th scope="row">
-                    <label for="category"><?php _e('Category', 'expense-tracker'); ?></label>
+                    <label for="category"><?php esc_html_e('Category', 'expense-tracker'); ?></label>
                 </th>
                 <td>
                     <select name="category_id" id="category" required>
-                        <option value=""><?php _e('Select Category', 'expense-tracker'); ?></option>
+                        <option value=""><?php esc_html_e('Select Category', 'expense-tracker'); ?></option>
                         <?php if ($categories) : ?>
                             <?php foreach ($categories as $category) : ?>
                                 <option value="<?php echo esc_attr($category['id']); ?>">
@@ -49,10 +49,10 @@ $categories = expense_tracker_init()->getModule('categories')->getCategories();
 
             <tr>
                 <th scope="row">
-                    <label for="date"><?php _e('Date', 'expense-tracker'); ?></label>
+                    <label for="date"><?php esc_html_e('Date', 'expense-tracker'); ?></label>
                 </th>
                 <td>
-                    <input type="date" name="date" id="date" class="regular-text" value="<?php echo date('Y-m-d'); ?>"
+                    <input type="date" name="date" id="date" class="regular-text" value="<?php echo esc_attr(gmdate('Y-m-d')); ?>"
                         required>
                 </td>
             </tr>
@@ -70,15 +70,15 @@ $categories = expense_tracker_init()->getModule('categories')->getCategories();
             const formData = $(this).serializeObject();
 
             $.ajax({
-                url: '<?php echo get_rest_url(null, 'expense-tracker/v1/expenses'); ?>',
+                url: '<?php echo esc_url(get_rest_url(null, 'expense-tracker/v1/expenses')); ?>',
                 method: 'POST',
                 data: formData,
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', '<?php echo wp_create_nonce('wp_rest'); ?>');
+                    xhr.setRequestHeader('X-WP-Nonce', '<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>');
                 },
                 success: function(response) {
                     console.log('Expense created:', response);
-                    window.location.href = '<?php echo admin_url('admin.php?page=expense-tracker'); ?>';
+                    window.location.href = '<?php echo esc_url(admin_url('admin.php?page=expense-tracker')); ?>';
                 },
                 error: function(error) {
                     console.error('Error creating expense:', error);

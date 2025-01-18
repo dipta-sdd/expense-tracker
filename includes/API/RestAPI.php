@@ -22,6 +22,9 @@ class RestAPI
         Route::put('/expenses/(?P<id>\d+)', [new ExpenseController(), 'update']);
         Route::delete('/expenses/(?P<id>\d+)', [new ExpenseController(), 'destroy']);
 
+        // Report Routes
+        Route::post('/reports', [expense_tracker_init()->getModule('report'), 'getReportController']);
+
         // Category Routes
         Route::get('/categories', [new CategoryController(), 'index']);
         Route::post('/categories', [new CategoryController(), 'store']);

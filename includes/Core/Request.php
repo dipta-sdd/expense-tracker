@@ -31,11 +31,22 @@ class Request
         'size' => 'This must be :size.'
     ];
 
+    /**
+     * Constructor for the Request class.
+     *
+     * @param array|null $data The data to be used for validation.
+     */
     public function __construct($data = null)
     {
         $this->data = $data;
     }
 
+    /**
+     * Validate the request data against the given rules.
+     *
+     * @param array $rules The validation rules.
+     * @return bool True if the data is valid, false otherwise.
+     */
     public function validate($rules)
     {
         foreach ($rules as $field => $ruleString) {
@@ -70,6 +81,14 @@ class Request
         return empty($this->errors);
     }
 
+    /**
+     * Validate a single field against the given rule.
+     *
+     * @param string $rule The validation rule.
+     * @param mixed $value The value of the field.
+     * @param array $parameters The parameters for the rule.
+     * @return bool True if the field is valid, false otherwise.
+     */
     private function validate_field($rule, $value, $parameters)
     {
         switch ($rule) {
@@ -92,6 +111,12 @@ class Request
         }
     }
 
+    /**
+     * Get the value of a field from the request data.
+     *
+     * @param string $field The field name.
+     * @return mixed|null The value of the field or null if not found.
+     */
     private function get_field_value($field)
     {
         $keys = explode('.', $field);
@@ -108,31 +133,50 @@ class Request
         return $value;
     }
 
+    /**
+     * Add an error message to the request.
+     *
+     * @param string $field The field name.
+     * @param string $rule The validation rule.
+     * @param array $parameters The parameters for the rule.
+     */
     private function add_error($field, $rule, $parameters)
     {
         $message = $this->messages[$rule];
 
-        // Replace placeholders
-        $message = str_replace(':attribute', $field, $message);
         if (!empty($parameters)) {
             $message = str_replace(':min', $parameters[0], $message);
             $message = str_replace(':max', $parameters[0], $message);
         }
-
         $this->errors[$field] = $message;
         $this->validated = false;
     }
 
+    /**
+     * Get the error messages for the request.
+     *
+     * @return array The error messages.
+     */
     public function getErrors()
     {
         return $this->errors;
     }
 
+    /**
+     * Check if the request is valid.
+     *
+     * @return bool True if the request is valid, false otherwise.
+     */
     public function isValid()
     {
         return $this->validated;
     }
 
+    /**
+     * Get all the data from the request.
+     *
+     * @return array The data from the request.
+     */
     public function all()
     {
         return $this->data;
